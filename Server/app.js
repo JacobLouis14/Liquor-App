@@ -43,7 +43,7 @@ app.use(function (err, req, res, next) {
 });
 
 //PORT
-const PORT = 5000;
+const PORT = process.env.PORT;
 const mongoUri = process.env.MONGO_URL;
 mongoose
   .connect(mongoUri)
