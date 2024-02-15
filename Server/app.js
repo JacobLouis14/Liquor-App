@@ -44,8 +44,9 @@ app.use(function (err, req, res, next) {
 
 //PORT
 const PORT = 5000;
+const mongoUri = process.env.MONGO_URL;
 mongoose
-  .connect(process.env.MONGO_URL)
+  .connect(mongoUri)
   .then(() => {
     app.listen(PORT, () => console.log(`Server Running on Port ${PORT}`));
   })
