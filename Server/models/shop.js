@@ -26,6 +26,17 @@ const ShopSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    Photos: {
+      type: Array,
+    },
+    Shop_Type: {
+      type: String,
+      required: true,
+    },
+    State: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -6,6 +6,7 @@ const {
   getDownloadURL,
   uploadBytesResumable,
 } = require("firebase/storage");
+const { isValidObjectId } = require("mongoose");
 //Firebase Configuration
 initializeApp({
   apiKey: process.env.API_KEY,
@@ -22,7 +23,7 @@ const getCategoryList = async (req, res) => {
   try {
     const categoryList = await CategoryModel.find(
       {},
-      { CategoryName: 1, _id: 0, CategoryValue: 1, CategoryPhotoUrl: 1 }
+      { CategoryName: 1, _id: 1, CategoryValue: 1, CategoryPhotoUrl: 1 }
     );
 
     if (categoryList.length > 0) {
@@ -40,7 +41,6 @@ const createCategory = async (req, res) => {
   try {
     if (req.file) {
       const { categoryName } = req.body;
-      console.log(req.body);
       const categoryValue = categoryName.toLowerCase();
 
       //checking the data exists
@@ -73,7 +73,7 @@ const createCategory = async (req, res) => {
           CategoryValue: categoryValue,
           CategoryPhotoUrl: downloadRef,
         }).save();
-        const { _id, createdAt, updatedAt, __v, ...categoryDataToSend } =
+        const { createdAt, updatedAt, __v, ...categoryDataToSend } =
           savedCategory._doc;
         res.status(200).json(categoryDataToSend);
       }
@@ -85,6 +85,23 @@ const createCategory = async (req, res) => {
   }
 };
 const updtateCategory = () => {};
-const deleteCategory = () => {};
+const deleteCategory = async (req, res) => {
+  try {
+    const categoryId = req.query.id;
+    if (isValidObjectId(categoryId)) {
+      const deleteAck = await CategoryModel.deleteOne({ _id: categoryId });
+      if (deleteAck.deletedCount === 1) {
+        const restData = await CategoryModel.find({});
+        res.status(200).json(restData);
+      } else {
+        res.status(500).send("server Error");
+      }
+    } else {
+      res.status(400).send("Invalid Id");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-module.exports = { getCategoryList, createCategory };
+module.exports = { getCategoryList, createCategory, deleteCategory };

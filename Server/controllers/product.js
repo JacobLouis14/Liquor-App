@@ -9,6 +9,8 @@ const {
   deleteObject,
 } = require("firebase/storage");
 const { isValidObjectId } = require("mongoose");
+const CategoryModel = require("../models/category");
+const StateModel = require("../models/state");
 
 //Firebase Configuration
 initializeApp({
@@ -90,7 +92,7 @@ const createProduct = async (req, res) => {
         res.send(`Already Exists`);
       }
     } else {
-      res.send(`Upload Photo`);
+      res.status(400).send(`Upload Photo`);
     }
   } catch (error) {
     console.log(`Error in creating Product ${error}`);
@@ -100,14 +102,50 @@ const createProduct = async (req, res) => {
 //Product Listing
 const getProductLIst = async (req, res) => {
   try {
-    const productList = await productModel.find(
-      {},
-      { createdAt: 0, updatedAt: 0, __v: 0 }
-    );
+    const category = req.params.category.toLowerCase();
+    const stateName = req.params.statename;
 
-    if (productList.length < 1)
-      res.json({ message: `ProductList is Empty, Add Products` });
-    else res.send(productList);
+    //Checking state exists
+    const isStateExists = await StateModel.findOne({ StateName: stateName });
+
+    // finding category exists
+    const isCategoryExists = await CategoryModel.findOne({
+      CategoryValue: category,
+    });
+    if (isStateExists) {
+      if (isCategoryExists) {
+        let productList;
+        // checking for all category
+        if (isCategoryExists.CategoryValue === "all") {
+          productList = await productModel.find(
+            {
+              ProductAvailableState: { $in: [isStateExists.StateName] },
+            },
+            { createdAt: 0, updatedAt: 0, __v: 0 }
+          );
+        } else {
+          // code for spesific category
+          productList = await productModel.find(
+            {
+              $and: [
+                { Category: isCategoryExists.CategoryName },
+                { ProductAvailableState: { $in: [isStateExists.StateName] } },
+              ],
+            },
+            { createdAt: 0, updatedAt: 0, __v: 0 }
+          );
+        }
+        if (productList.length < 1)
+          res
+            .status(204)
+            .json({ message: `ProductList is Empty, Add Products` });
+        else res.status(200).send(productList);
+      } else {
+        res.status(400).json({ message: `Category not found` });
+      }
+    } else {
+      res.status(400).json({ message: `State not found` });
+    }
   } catch (error) {
     console.log(`Error in Listing Products ${error}`);
   }
@@ -252,9 +290,24 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+//////////////////////////////////////DASHBOARD CONTROLS////////////////////////////////////
+const getAllProduct = async (req, res) => {
+  try {
+    const allProduct = await productModel.find({});
+    if (allProduct.length > 0) {
+      res.status(200).json(allProduct);
+    } else {
+      res.status(400).send("No data Found");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   createProduct,
   getProductLIst,
   updateProduct,
   deleteProduct,
+  getAllProduct,
 };

@@ -15,13 +15,13 @@ const signIn = async (req, res) => {
     let isExists = await userModel.findOne({ Email: email });
 
     if (!isExists) {
-      res.status(404).json({ msg: "No account, in our history" });
+      return res.status(404).json({ msg: "No account, in our history" });
     }
 
     //Checking password
     let isPasswordMatch = await bcrypt.compare(password, isExists.Password);
     if (!isPasswordMatch) {
-      res.status(401).json({ msg: "Invalid UserName/Password" });
+      return res.status(401).json({ msg: "Invalid UserName/Password" });
     }
 
     //Token Generating

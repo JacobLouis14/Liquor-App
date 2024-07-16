@@ -3,11 +3,12 @@ const router = express.Router();
 
 // controllers
 const { signIn, signUp } = require("../controllers/auth");
-const { userAuth } = require("../middleware/auth");
+const { userAuth, isAdmin } = require("../middleware/auth");
 const {
   userData,
   getUserWishlist,
   createUserWishlist,
+  getFullUserData,
 } = require("../controllers/user_controller");
 
 /* user login route */
@@ -24,5 +25,8 @@ router.get("/wishlistdata", userAuth, getUserWishlist);
 
 /**User wishlist creation */
 router.patch("/createwishlist", userAuth, createUserWishlist);
+
+// Admin controll Route
+router.get("/getfulluserdata", getFullUserData);
 
 module.exports = router;

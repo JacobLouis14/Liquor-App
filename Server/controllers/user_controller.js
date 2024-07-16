@@ -73,5 +73,21 @@ const createUserWishlist = async (req, res) => {
     console.log(error);
   }
 };
+// ///////////////////////////////DASHBOARD CONTROLS///////////////////////////
 
-module.exports = { userData, getUserWishlist, createUserWishlist };
+///////////////////////////////User Full Data Retrival
+const getFullUserData = async (req, res) => {
+  try {
+    const userList = await UserModel.find({});
+    res.status(200).json(userList);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = {
+  userData,
+  getUserWishlist,
+  createUserWishlist,
+  getFullUserData,
+};

@@ -17,8 +17,7 @@ const createState = async (req, res) => {
         StateName: StateName,
         StateValue: distValue,
       }).save();
-      const { _id, createdAt, updatedAt, __v, ...stateDataToSend } =
-        savedState._doc;
+      const { createdAt, updatedAt, __v, ...stateDataToSend } = savedState._doc;
       res.status(200).json(stateDataToSend);
     }
   } catch (error) {
@@ -29,7 +28,7 @@ const createState = async (req, res) => {
 //Listing States
 const listStates = async (req, res) => {
   try {
-    const StatesList = await StateModel.find({}, { StateName: 1, _id: 0 });
+    const StatesList = await StateModel.find({}, { StateName: 1, _id: 1 });
 
     if (StatesList.length > 0) {
       res.status(200).send(StatesList);
@@ -83,7 +82,7 @@ const deleteStates = async (req, res) => {
   if (isValidObjectId(id)) {
     const deleteAcknowledgment = await StateModel.deleteOne({ _id: id });
     if (deleteAcknowledgment.deletedCount === 1) {
-      const restData = await StateModel.find({}, { StateName: 1 });
+      const restData = await StateModel.find({}, { StateName: 1, _id: 1 });
       res.status(200).json(restData);
     } else {
       res.json({ message: `Can't find the data` });
